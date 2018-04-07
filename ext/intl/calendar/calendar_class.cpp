@@ -34,6 +34,9 @@ extern "C" {
 #include <assert.h>
 }
 
+using icu::GregorianCalendar;
+using icu::Locale;
+
 /* {{{ Global variables */
 zend_class_entry *Calendar_ce_ptr;
 zend_class_entry *GregorianCalendar_ce_ptr;
@@ -154,8 +157,7 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp)
 
 	*is_temp = 1;
 
-	ALLOC_HASHTABLE(debug_info);
-	zend_hash_init(debug_info, 8, NULL, ZVAL_PTR_DTOR, 0);
+	debug_info = zend_new_array(8);
 
 	co  = Z_INTL_CALENDAR_P(object);
 	cal = co->ucal;

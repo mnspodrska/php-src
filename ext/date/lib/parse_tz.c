@@ -218,7 +218,7 @@ static int read_types(const unsigned char **tzf, timelib_tzinfo *tz)
 	memcpy(buffer, *tzf, sizeof(unsigned char) * 6 * tz->bit32.typecnt);
 	*tzf += sizeof(unsigned char) * 6 * tz->bit32.typecnt;
 
-	tz->type = (ttinfo*) timelib_malloc(tz->bit32.typecnt * sizeof(struct ttinfo));
+	tz->type = (ttinfo*) timelib_malloc(tz->bit32.typecnt * sizeof(ttinfo));
 	if (!tz->type) {
 		timelib_free(buffer);
 		return TIMELIB_ERROR_CANNOT_ALLOCATE;
@@ -377,25 +377,14 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 static int seek_to_tz_position(const unsigned char **tzf, char *timezone, const timelib_tzdb *tzdb)
 {
 	int left = 0, right = tzdb->index_size - 1;
-#ifdef HAVE_SETLOCALE
-	char *cur_locale = NULL, *tmp;
-#endif
 
 	if (tzdb->index_size == 0) {
 		return 0;
 	}
 
-#ifdef HAVE_SETLOCALE
-	tmp = setlocale(LC_CTYPE, NULL);
-	if (tmp) {
-		cur_locale = timelib_strdup(tmp);
-	}
-	setlocale(LC_CTYPE, "C");
-#endif
-
 	do {
 		int mid = ((unsigned)left + right) >> 1;
-		int cmp = strcasecmp(timezone, tzdb->index[mid].id);
+		int cmp = timelib_strcasecmp(timezone, tzdb->index[mid].id);
 
 		if (cmp < 0) {
 			right = mid - 1;
@@ -403,19 +392,11 @@ static int seek_to_tz_position(const unsigned char **tzf, char *timezone, const 
 			left = mid + 1;
 		} else { /* (cmp == 0) */
 			(*tzf) = &(tzdb->data[tzdb->index[mid].pos]);
-#ifdef HAVE_SETLOCALE
-			setlocale(LC_CTYPE, cur_locale);
-			if (cur_locale) timelib_free(cur_locale);
-#endif
 			return 1;
 		}
 
 	} while (left <= right);
 
-#ifdef HAVE_SETLOCALE
-	setlocale(LC_CTYPE, cur_locale);
-	if (cur_locale) timelib_free(cur_locale);
-#endif
 	return 0;
 }
 
@@ -424,7 +405,7 @@ const timelib_tzdb *timelib_builtin_db(void)
 	return &timezonedb_builtin;
 }
 
-const timelib_tzdb_index_entry *timelib_timezone_identifiers_list(timelib_tzdb *tzdb, int *count)
+const timelib_tzdb_index_entry *timelib_timezone_identifiers_list(const timelib_tzdb *tzdb, int *count)
 {
 	*count = tzdb->index_size;
 	return tzdb->index;
@@ -558,8 +539,8 @@ timelib_tzinfo *timelib_tzinfo_clone(timelib_tzinfo *tz)
 		memcpy(tmp->trans_idx, tz->trans_idx, tz->bit32.timecnt * sizeof(unsigned char));
 	}
 
-	tmp->type = (ttinfo*) timelib_malloc(tz->bit32.typecnt * sizeof(struct ttinfo));
-	memcpy(tmp->type, tz->type, tz->bit32.typecnt * sizeof(struct ttinfo));
+	tmp->type = (ttinfo*) timelib_malloc(tz->bit32.typecnt * sizeof(ttinfo));
+	memcpy(tmp->type, tz->type, tz->bit32.typecnt * sizeof(ttinfo));
 
 	tmp->timezone_abbr = (char*) timelib_malloc(tz->bit32.charcnt);
 	memcpy(tmp->timezone_abbr, tz->timezone_abbr, tz->bit32.charcnt);

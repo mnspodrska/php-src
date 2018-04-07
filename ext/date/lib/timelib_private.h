@@ -25,10 +25,6 @@
 #ifndef __TIMELIB_PRIVATE_H__
 #define __TIMELIB_PRIVATE_H__
 
-#ifdef HAVE_SETLOCALE
-# include "locale.h"
-#endif
-
 #ifdef HAVE_TIMELIB_CONFIG_H
 # include "timelib_config.h"
 #endif
@@ -115,7 +111,7 @@
 		m = NULL;   \
 	}
 
-typedef struct ttinfo
+struct _ttinfo
 {
 	int32_t      offset;
 	int          isdst;
@@ -123,13 +119,13 @@ typedef struct ttinfo
 
 	unsigned int isstdcnt;
 	unsigned int isgmtcnt;
-} ttinfo;
+};
 
-typedef struct tlinfo
+struct _tlinfo
 {
 	int32_t  trans;
 	int32_t  offset;
-} tlinfo;
+};
 
 
 #ifndef LONG_MAX
@@ -140,19 +136,14 @@ typedef struct tlinfo
 #define LONG_MIN (- LONG_MAX - 1)
 #endif
 
-#if defined(_MSC_VER) && !defined(strcasecmp)
-#define strcasecmp stricmp
-#endif
-
-#if defined(_MSC_VER) && !defined(strncasecmp)
-#define strncasecmp strnicmp
-#endif
-
 /* From unixtime2tm.c */
 int timelib_apply_localtime(timelib_time *t, unsigned int localtime);
 
 /* From parse_tz.c */
 void timelib_time_tz_abbr_update(timelib_time* tm, char* tz_abbr);
 
+/* From timelib.c */
+int timelib_strcasecmp(const char *s1, const char *s2);
+int timelib_strncasecmp(const char *s1, const char *s2, size_t n);
 
 #endif
